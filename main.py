@@ -11,6 +11,7 @@ SNAKE_COLOR = "#00FF00"
 FOOD_COLOR = "#FF0000"
 BACKGROUND_COLOR = "#000000"
 
+#Self-explanatory
 class Snake:
 
     def __init__(self):
@@ -25,6 +26,7 @@ class Snake:
             square = canvas.create_rectangle(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=SNAKE_COLOR, tag="snake")
             self.squares.append(square)
 
+#Class for the food eaten by the snake
 class Food:
     def __init__(self):
 
@@ -35,6 +37,7 @@ class Food:
 
         canvas.create_oval(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=FOOD_COLOR, tag="food")
 
+#movement mechanism for the snake
 def next_turn(snake, food, speed):
 
     x, y = snake.coordinates[0]
@@ -86,6 +89,7 @@ def next_turn(snake, food, speed):
     else:
         window.after(speed, next_turn, snake, food, speed)
 
+#changes direction depending on arrow keys
 def change_direction(new_direction):
 
     global direction
@@ -102,6 +106,8 @@ def change_direction(new_direction):
     if new_direction == 'down':
         if direction != 'up':
             direction = new_direction
+
+#checks whether the snake has collided with the walls or itself
 def check_collisions(snake):
 
     x,y = snake.coordinates[0]
@@ -117,12 +123,37 @@ def check_collisions(snake):
             return True
 
     return False
+
+#resets all the values and restarts the game
+def restart_game():
+    global score, direction
+    score = 0
+    direction = 'down'
+    label.config(text="Score:{}".format(score))
+    canvas.delete("game_over")
+    canvas.delete("food")
+    snake.coordinates = []
+    snake.squares = []
+    for i in range(0, BODY_PARTS):
+        snake.coordinates.append([0, 0])
+    snake.__init__()
+    food.__init__()
+    next_turn(snake, food, speed)
+
+#ends the game if snake touches the borders or itself
 def game_over():
 
     canvas.delete(ALL)
     canvas.create_text(canvas.winfo_width()/2, canvas.winfo_height()/2,
                        font =('consolas',70), text="GAME OVER", fill="red", tag="game_over")
 
+    canvas.create_text(canvas.winfo_width() / 2, canvas.winfo_height() / 2 + 100,
+                       font=('consolas', 30), text="Press 'R' to retry", fill="white", tag="game_over")
+
+#key press method to restart the game
+def key_press(event):
+    if event.char.lower() == 'r':
+        restart_game()
 
 window = Tk()
 window.title("Snake game")
@@ -136,6 +167,9 @@ label.pack()
 
 canvas = Canvas(window, bg=BACKGROUND_COLOR, height=GAME_HEIGHT, width=GAME_WIDTH)
 canvas.pack()
+
+#Binds the key to the key press
+window.bind('<Key>', key_press) 
 
 window.update()
 
